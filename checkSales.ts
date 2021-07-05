@@ -23,12 +23,12 @@ const  discordSetup = async (): Promise<TextChannel> => {
 
 const buildMessage = (sale: any) => (
   new Discord.MessageEmbed()
-	.setColor('#0099ff')
-	.setTitle(sale.asset.name + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
+	.setColor('#8CFF9B')
+	.setTitle('DystoPunk V2 #'+Number.parseInt(sale.asset.token_id) + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
 	.setURL(sale.asset.permalink)
 	.setThumbnail(sale.asset.image_url)
 	.addFields(
-		{ name: 'Buyer - Seller', value: '['+sale?.winner_account?.user.username+'](https://opensea.io/'+sale?.winner_account?.user.username+')' + ' - ['+sale?.seller?.user.username+'](https://opensea.io/'+sale?.seller?.user.username+')', },
+		{ name: 'Buyer', value: '['+sale?.winner_account?.user.username+'](https://opensea.io/'+sale?.winner_account?.user.username+')', },
 	)
   
 	.setTimestamp(sale.created_date) // unclear why this seems broken
@@ -37,7 +37,7 @@ const buildMessage = (sale: any) => (
 
 async function main() {
   const channel = await discordSetup();
-  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 17_600;
+  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 600;
   const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
   
   const openSeaResponse = await fetch(
@@ -53,7 +53,14 @@ async function main() {
 
   await Promise.all(
     openSeaResponse?.asset_events?.map(async (sale: any) => {
+      sale.asset.token_id=Number.parseInt(sale.asset.token_id)+1;
+      if (sale.winner_account.user.username==null) {
+         sale.winner_account.user.username=sale.winner_account.address;
+      }
+
+      
       const message = buildMessage(sale);
+      //console.log(sale);
       return channel.send(message)
     })
   );   
