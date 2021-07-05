@@ -23,8 +23,8 @@ const  discordSetup = async (): Promise<TextChannel> => {
 
 const buildMessage = (sale: any) => (
   new Discord.MessageEmbed()
-	.setColor('#8CFF9B')
-	.setTitle('DystoPunk V2 #'+Number.parseInt(sale.asset.token_id) + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
+	.setColor('#78FAE6')
+	.setTitle(sale.asset.name  + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
 	.setURL(sale.asset.permalink)
 	.setThumbnail(sale.asset.image_url)
 	.addFields(
@@ -37,7 +37,7 @@ const buildMessage = (sale: any) => (
 
 async function main() {
   const channel = await discordSetup();
-  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 600;
+  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3_600;
   const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
   
   const openSeaResponse = await fetch(
@@ -53,7 +53,7 @@ async function main() {
 
   await Promise.all(
     openSeaResponse?.asset_events?.map(async (sale: any) => {
-      sale.asset.token_id=Number.parseInt(sale.asset.token_id)+1;
+
       if (sale.winner_account.user.username==null) {
          sale.winner_account.user.username=sale.winner_account.address;
       }
