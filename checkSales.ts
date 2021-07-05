@@ -11,36 +11,33 @@ const  discordSetup = async (): Promise<TextChannel> => {
     ['DISCORD_BOT_TOKEN', 'DISCORD_CHANNEL_ID'].forEach((envVar) => {
       if (!process.env[envVar]) reject(`${envVar} not set`)
     })
-  
+
     discordBot.login(process.env.DISCORD_BOT_TOKEN);
     discordBot.on('ready', async () => {
       const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID!);
       resolve(channel as TextChannel);
     });
+    
   })
 }
 
 const buildMessage = (sale: any) => (
   new Discord.MessageEmbed()
 	.setColor('#0099ff')
-	.setTitle(sale.asset.name + ' sold!')
+	.setTitle(sale.asset.name + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
 	.setURL(sale.asset.permalink)
-	.setAuthor('OpenSea Bot', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png', 'https://github.com/sbauch/opensea-discord-bot')
-	.setThumbnail(sale.asset.collection.image_url)
+	.setThumbnail(sale.asset.image_url)
 	.addFields(
-		{ name: 'Name', value: sale.asset.name },
-		{ name: 'Amount', value: `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`},
-		{ name: 'Buyer', value: sale?.winner_account?.address, },
-		{ name: 'Seller', value: sale?.seller?.address,  },
+		{ name: 'Buyer - Seller', value: '['+sale?.winner_account?.user.username+'](https://opensea.io/'+sale?.winner_account?.user.username+')' + ' - ['+sale?.seller?.user.username+'](https://opensea.io/'+sale?.seller?.user.username+')', },
 	)
-  .setImage(sale.asset.image_url)
+  
 	.setTimestamp(sale.created_date) // unclear why this seems broken
-	.setFooter('Sold on OpenSea', 'https://files.readme.io/566c72b-opensea-logomark-full-colored.png')
+	.setFooter('Sold on OpenSea')
 )
 
 async function main() {
   const channel = await discordSetup();
-  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3_600;
+  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 17_600;
   const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
   
   const openSeaResponse = await fetch(
