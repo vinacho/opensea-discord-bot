@@ -24,7 +24,7 @@ const  discordSetup = async (): Promise<TextChannel> => {
 const buildMessage = (sale: any) => (
   new Discord.MessageEmbed()
 	.setColor('#8CFF9B')
-	.setTitle('DystoPunk V2 #'+Number.parseInt(sale.asset.token_id) + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
+	.setTitle('OctoHedz #'+Number.parseInt(sale.asset.token_id) + ' @' + `${ethers.utils.formatEther(sale.total_price)}${ethers.constants.EtherSymbol}`)
 	.setURL(sale.asset.permalink)
 	.setThumbnail(sale.asset.image_url)
 	.addFields(
@@ -37,7 +37,7 @@ const buildMessage = (sale: any) => (
 
 async function main() {
   const channel = await discordSetup();
-  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 600;
+  const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 2_000;
   const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
   
   const openSeaResponse = await fetch(
@@ -48,8 +48,8 @@ async function main() {
       only_opensea: 'true',
       occurred_after: hoursAgo.toString(), 
       collection_slug: process.env.COLLECTION_SLUG!,
-      contract_address: process.env.CONTRACT_ADDRESS!
   })).then((resp) => resp.json());
+  
 
   await Promise.all(
     openSeaResponse?.asset_events?.map(async (sale: any) => {
